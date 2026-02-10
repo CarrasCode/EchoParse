@@ -1,0 +1,21 @@
+# Python compilado
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Django específico
+db.sqlite3
+local_settings.py
+media/
+staticfiles/
+
+# Reportes de tests
+nosetests.xml
+coverage.xml
+htmlcov/
+.tox/

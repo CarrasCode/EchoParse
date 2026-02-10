@@ -1,0 +1,62 @@
+[project]
+name = "wipserdock-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    "ruff>=0.15.0",
+]
+
+[tool.ruff]
+# 1. Configuración Global
+line-length = 88            # El estándar de la industria (mismo que Black)
+target-version = "py314"    # Ajusta a tu versión mínima de Python (ej: py310, py311)
+exclude = [                 # Carpetas que no quieres tocar
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors (Errores de estilo estándar)
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes (Errores lógicos, variables no usadas)
+    "I",   # isort (¡IMPORTANTE! Ordena tus imports automáticamente)
+    "B",   # flake8-bugbear (Encuentra errores sutiles y "code smells")
+    "UP",  # pyupgrade (Mantiene tu sintaxis de Python moderna automáticamente)
+    "N",   # pep8-naming (Te avisa si tus variables no siguen snake_case)
+    "SIM", # flake8-simplify (Te sugiere formas más simples de escribir código)
+    "DJ"
+]
+
+# 3. Reglas Ignoradas
+ignore = [
+    "E501", # Ignorar "línea muy larga". El formatter se encarga de esto, no el linter.
+]
+
+# 4. Configuración de Auto-fix
+fixable = ["ALL"] # Permite que Ruff arregle todo lo que sepa arreglar
+unfixable = []
+
+[tool.ruff.format]
+# 5. Estilo de Formateo (Como Black)
+quote-style = "double"      # Usa comillas dobles " (estándar). Cambia a "single" si prefieres '
+indent-style = "space"      # Siempre espacios, nunca tabs
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+
+
+[tool.ruff.lint.isort]
+# Configuración específica para ordenar imports
+combine-as-imports = true   # Combina 'from x import a' y 'from x import b' en una línea

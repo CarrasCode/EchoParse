@@ -1,0 +1,9 @@
+# Ignorar carpetas de build y dependencias
+dist/
+build/
+node_modules/
+coverage/
+
+# Ignorar archivos generados automáticamente
+package-lock.json
+pnpm-lock.yaml

@@ -1,0 +1,63 @@
+repos:
+  # -----------------------
+  # BACKEND (Python)
+  # -----------------------
+  - repo: local
+    hooks:
+      # LINTER (Ruff Check)
+      - id: ruff-check
+        name: ruff-check-backend
+        # Ejecutamos uv desde la raíz, apuntando al directorio backend
+        entry: uv run --directory Backend ruff check --fix --force-exclude
+        language: system
+        types: [python]
+        files: ^Backend/
+
+      # FORMATTER (Ruff Format)
+      - id: ruff-format
+        name: ruff-format-backend
+        entry: uv run --directory Backend ruff format --force-exclude
+        language: system
+        types: [python]
+        files: ^Backend/
+
+  # -----------------------
+  # FRONTEND (Angular)
+  # -----------------------
+  - repo: local
+    hooks:
+      # ESLINT (Local)
+      - id: angular-eslint
+        name: angular-eslint
+        # Ejecuta el script 'lint:staged' dentro de la carpeta frontend
+        entry: node Frontend/node_modules/eslint/bin/eslint.js --config Frontend/.eslintrc.json --resolve-plugins-relative-to Frontend --fix
+        language: system
+        types_or: [ts, html]
+        files: ^Frontend/
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    # Usamos una versión sólida y probada de la serie 3
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        name: prettier-frontend
+        # Solo ejecuta en la carpeta Frontend
+        files: ^Frontend/
+        # Tipos de archivo
+        types_or: [javascript, jsx, ts, tsx, css, scss, json, html, yaml]
+        args:
+          [
+            '--cache-location=Frontend/node_modules/.cache/prettier/.prettiercache',
+          ]
+  # -----------------------
+  # GENERAL (Todo el repo)
+  # -----------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      # Muy útil en Django para evitar commitear migraciones conflictivas
+      - id: check-merge-conflict
+      - id: check-added-large-files

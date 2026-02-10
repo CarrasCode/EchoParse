@@ -1,0 +1,12 @@
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Monorepo / Herramientas de build
+dist/
+build/
+*.log
