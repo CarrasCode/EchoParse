@@ -1,21 +1,25 @@
-# Python compilado
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+dist/
+build/
+*.log
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Entornos virtuales
 venv/
+.venv/
 env/
 .env
-
-# Django específico
-db.sqlite3
-local_settings.py
-media/
-staticfiles/
-
-# Reportes de tests
-nosetests.xml
-coverage.xml
+.env.* # Ignora .env.local, .env.prod, etc.
+!.env.example # archivo de ejemplo
+.ruff_cache/
+.pytest_cache/
+.coverage
 htmlcov/
-.tox/
+postgres_data/
+pgdata/
+uploads/
+tmp/
+media/

@@ -1,9 +1,9 @@
 [project]
-name = "wipserdock-backend"
+name = "echoparse-backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "API asíncrona para transcripción de audio con FastAPI, Celery y Whisper"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
 
 ]
@@ -12,13 +12,13 @@ dependencies = [
 dev = [
     "pre-commit>=4.5.1",
     "ruff>=0.15.0",
+    "pytest>=8.0.0",
 ]
 
 [tool.ruff]
-# 1. Configuración Global
-line-length = 88            # El estándar de la industria (mismo que Black)
-target-version = "py314"    # Ajusta a tu versión mínima de Python (ej: py310, py311)
-exclude = [                 # Carpetas que no quieres tocar
+line-length = 100
+target-version = "py312"
+exclude = [
     ".venv",
     "venv",
     "__pycache__",
@@ -28,35 +28,32 @@ exclude = [                 # Carpetas que no quieres tocar
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors (Errores de estilo estándar)
+    "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
-    "F",   # Pyflakes (Errores lógicos, variables no usadas)
-    "I",   # isort (¡IMPORTANTE! Ordena tus imports automáticamente)
-    "B",   # flake8-bugbear (Encuentra errores sutiles y "code smells")
-    "UP",  # pyupgrade (Mantiene tu sintaxis de Python moderna automáticamente)
-    "N",   # pep8-naming (Te avisa si tus variables no siguen snake_case)
-    "SIM", # flake8-simplify (Te sugiere formas más simples de escribir código)
-    "DJ"
+    "F",   # Pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "FAST",# <--  Reglas específicas de FastAPI
+    "RUF", # <--  Reglas exclusivas de Ruff
+    "C4",  # <--  Mejoras en comprehensions (listas/diccionarios)
+    "PT",  # <--  Mejores prácticas para Pytest
 ]
 
-# 3. Reglas Ignoradas
 ignore = [
-    "E501", # Ignorar "línea muy larga". El formatter se encarga de esto, no el linter.
+    "E501",
 ]
 
-# 4. Configuración de Auto-fix
-fixable = ["ALL"] # Permite que Ruff arregle todo lo que sepa arreglar
+fixable = ["ALL"]
 unfixable = []
 
 [tool.ruff.format]
-# 5. Estilo de Formateo (Como Black)
-quote-style = "double"      # Usa comillas dobles " (estándar). Cambia a "single" si prefieres '
-indent-style = "space"      # Siempre espacios, nunca tabs
+quote-style = "double"
+indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
-
-
 [tool.ruff.lint.isort]
-# Configuración específica para ordenar imports
-combine-as-imports = true   # Combina 'from x import a' y 'from x import b' en una línea
+combine-as-imports = true
