@@ -17,3 +17,6 @@ env/
 .env
 .env.* # Ignora .env.local, .env.prod, etc.
 !.env.example # archivo de ejemplo
+.antigravity/
+.antigravityrules
+GEMINI.md
