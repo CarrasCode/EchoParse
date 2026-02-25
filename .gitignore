@@ -20,3 +20,6 @@ env/
 .antigravity/
 .antigravityrules
 GEMINI.md
+.agent/
+.agents/
+skills-lock.json

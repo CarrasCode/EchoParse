@@ -1,4 +1,14 @@
 services:
+  app:
+    build: ./Backend/
+    container_name: echoparse-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - cache
+    networks:
+      - echoparse-network
   db:
     image: postgres:18.2-alpine3.22
     container_name: echoparse-db

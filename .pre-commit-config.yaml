@@ -2,23 +2,13 @@ repos:
   # -----------------------
   # BACKEND (Python)
   # -----------------------
-  - repo: local
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.2
     hooks:
-      # LINTER (Ruff Check)
-      - id: ruff-check
-        name: ruff-check-backend
-        # Ejecutamos uv desde la raíz, apuntando al directorio backend
-        entry: uv run --directory Backend ruff check --fix --force-exclude
-        language: system
-        types: [python]
+      - id: ruff
+        args: [--fix]
         files: ^Backend/
-
-      # FORMATTER (Ruff Format)
       - id: ruff-format
-        name: ruff-format-backend
-        entry: uv run --directory Backend ruff format --force-exclude
-        language: system
-        types: [python]
         files: ^Backend/
 
   # -----------------------

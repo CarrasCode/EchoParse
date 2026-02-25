@@ -1,0 +1,42 @@
+# Usa una imagen base oficial de Python ligera
+FROM python:3.12-slim AS builder
+
+
+# Instala dependencias del sistema necesarias (si las hay en el futuro) y curl para healthchecks
+RUN apt-get update && apt-get install -y --no-install-recommends gcc build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instala uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Configura el directorio de trabajo
+WORKDIR /app
+# Copia los archivos de definición de dependencias
+COPY pyproject.toml uv.lock ./
+
+# Instala las dependencias en el entorno global del sistema (ya que estamos dentro de un contenedor)
+RUN uv sync --frozen --no-cache --no-install-project
+
+FROM python:3.12-slim
+
+# Evita que Python escriba archivos .pyc y fuerza que stdout/stderr no tengan buffer
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# 2. Instala ÚNICAMENTE curl en la imagen final para los healthchecks
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+# Copia el código de la aplicación
+COPY . .
+# Copia las librerias instaladas sobrescribiendo por si copiamos las otras sin querer
+COPY --from=builder /app/.venv /app/.venv
+
+# Asigna la variables de entorno para poder ejecutar el uvicorn
+ENV PATH="/app/.venv/bin:$PATH"
+# Expone el puerto donde se ejecutará FastAPI
+EXPOSE 8000
+# Comando para ejecutar la aplicación usando uvicorn a través de uv
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
