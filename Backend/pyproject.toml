@@ -5,7 +5,10 @@ description = "API asíncrona para transcripción de audio con FastAPI, Celery y
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "asyncpg>=0.31.0",
     "fastapi>=0.131.0",
+    "pydantic-settings>=2.13.1",
+    "sqlalchemy>=2.0.48",
     "uvicorn>=0.41.0",
 ]
 
