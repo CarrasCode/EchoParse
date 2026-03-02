@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc build-essen
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Configura el directorio de trabajo
-WORKDIR /app
+WORKDIR /code
 # Copia los archivos de definición de dependencias
 COPY pyproject.toml uv.lock ./
 
@@ -28,15 +28,19 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /code
 # Copia el código de la aplicación
-COPY . .
+COPY app ./app
 # Copia las librerias instaladas sobrescribiendo por si copiamos las otras sin querer
-COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /code/.venv /code/.venv
 
 # Asigna la variables de entorno para poder ejecutar el uvicorn
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/code/.venv/bin:$PATH"
 # Expone el puerto donde se ejecutará FastAPI
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
 # Comando para ejecutar la aplicación usando uvicorn a través de uv
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
