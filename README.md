@@ -26,11 +26,11 @@ Este documento mantiene el estado global del proyecto.
 - [x] Crear el `docker-compose.yml` en la raíz.
 - [x] Levantar el servicio de base de datos (PostgreSQL).
 - [x] Levantar el servicio de colas de mensajes (Redis).
-- [ ] Crear un `Dockerfile.api` básico y levantar un "Hola Mundo" en FastAPI que se conecte a la BD.
+- [x] Crear un `Dockerfile.api` básico y levantar un "Hola Mundo" en FastAPI que se conecte a la BD.
 
 ## Fase 2: El Esqueleto de la API (Síncrono)
 
-- [ ] Configurar SQLAlchemy 2.0 y crear el modelo de base de datos (Tabla `TranscriptionJob` con estados `PENDING`, `PROCESSING`, etc.).
+- [x] Configurar SQLAlchemy 2.0 y crear el modelo de base de datos (Tabla `TranscriptionJob` con estados `PENDING`, `PROCESSING`, etc.).
 - [ ] Crear el endpoint `POST /api/v1/transcriptions/` usando `UploadFile` de FastAPI.
 - [ ] Guardar el archivo de audio físicamente en un volumen de Docker.
 - [ ] Devolver al usuario un ID de seguimiento (Ticket).
