@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
+from .api.router import router
+
 app = FastAPI()
 
-
-@app.get("/health")
-async def health_check() -> dict[str, str]:
-    return {"status": "EchoParse API is running"}
+app.include_router(router, prefix="/api/v1")

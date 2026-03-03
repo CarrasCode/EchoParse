@@ -2,11 +2,16 @@ services:
   app:
     build: ./Backend/
     container_name: echoparse-backend
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     depends_on:
       - db
       - cache
+    volumes:
+      - ./Backend/app:/code/app
+      - backend_data:/code/data
     networks:
       - echoparse-network
   db:
@@ -19,7 +24,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - echoparse-network
 
@@ -37,6 +42,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  backend_data:
 
 networks:
   echoparse-network:

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_DB: str
     POSTGRES_HOST: str = "localhost"
+    UPLOAD_DIR: str = f"{BASE_DIR}/data/audios"
 
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
