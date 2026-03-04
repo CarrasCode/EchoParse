@@ -5,7 +5,7 @@ from enum import StrEnum
 from sqlalchemy import Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from Backend.app.core.base import Base
+from ...core.base import Base
 
 
 class StatusTranscription(StrEnum):

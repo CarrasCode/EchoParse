@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, UploadFile
 
 from ...api.dependencies import SessionDep
 from ...core.config import settings
+from ..transcriptions.service import create_transcription_bd
 
 router = APIRouter(prefix="/transcriptions", tags=["Transcriptions"])
 
@@ -12,7 +13,7 @@ os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/")
-async def create_transcription(file: UploadFile, session: SessionDep):
+async def create_transcription(file: UploadFile, db: SessionDep):
     max_size = 50 * 1024 * 1024
     longitud = file.size
     type = file.content_type
@@ -22,15 +23,13 @@ async def create_transcription(file: UploadFile, session: SessionDep):
 
     if not type or not type.startswith("audio/"):
         raise HTTPException(status_code=400, detail="Only audio")
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No name found")
     file_location = f"{settings.UPLOAD_DIR}/{file.filename}"
 
     async with aiofiles.open(file_location, "wb") as out_file:
         while content := await file.read(1024 * 1024):
             _ = await out_file.write(content)
 
-    return {
-        "file_name": file.filename,
-        "file_len": longitud,
-        "type": type,
-        "location": file_location,
-    }
+    result = await create_transcription_bd(db=db, file_name=file.filename, file_path=file_location)
+    return result
