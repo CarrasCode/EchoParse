@@ -33,7 +33,7 @@ Este documento mantiene el estado global del proyecto.
 - [x] Configurar SQLAlchemy 2.0 y crear el modelo de base de datos (Tabla `TranscriptionJob` con estados `PENDING`, `PROCESSING`, etc.).
 - [x] Crear el endpoint `POST /api/v1/transcriptions/` usando `UploadFile` de FastAPI.
 - [x] Guardar el archivo de audio físicamente en un volumen de Docker.
-- [ ] Devolver al usuario un ID de seguimiento (Ticket).
+- [x] Devolver al usuario un ID de seguimiento (Ticket).
 
 ## Fase 3: El Músculo Asíncrono (Celery + Redis)
 

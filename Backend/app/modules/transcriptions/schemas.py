@@ -1,0 +1,11 @@
+import uuid
+
+from pydantic import BaseModel, ConfigDict
+
+from .models import StatusTranscription
+
+
+class TranscriptionReturn(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    status: StatusTranscription

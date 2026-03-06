@@ -16,7 +16,7 @@ class StatusTranscription(StrEnum):
 
 class TranscriptionJob(Base):
     __tablename__ = "transcripciones"
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     filename: Mapped[str] = mapped_column()
     status: Mapped[StatusTranscription] = mapped_column(default=StatusTranscription.PENDING)
     transcript: Mapped[str | None] = mapped_column(Text)
