@@ -10,8 +10,10 @@ services:
       - db
       - cache
     volumes:
-      - ./Backend/app:/code/app
-      - backend_data:/code/data
+      - ./Backend/:/code/ # General: monta TODO
+      - /code/.venv # Específico: "protege" .venv
+      - backend_data:/code/data # Específico: "protege" data
+
     networks:
       - echoparse-network
   db:

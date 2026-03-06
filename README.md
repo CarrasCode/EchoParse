@@ -34,6 +34,11 @@ Este documento mantiene el estado global del proyecto.
 - [x] Crear el endpoint `POST /api/v1/transcriptions/` usando `UploadFile` de FastAPI.
 - [x] Guardar el archivo de audio físicamente en un volumen de Docker.
 - [x] Devolver al usuario un ID de seguimiento (Ticket).
+- [x] Integrar **Alembic** para migraciones de base de datos (reemplazar `create_all`).
+  - [x] Configurar `env.py` asíncrono para funcionar con `asyncpg`.
+  - [x] Crear registro centralizado de modelos (`all_models.py`).
+  - [x] Inyectar `DATABASE_URL` desde `pydantic-settings` (sin hardcodear).
+  - [x] Actualizar `Dockerfile` (`COPY . .`) y `docker-compose.yml` (volume mount completo con protección de `.venv`).
 
 ## Fase 3: El Músculo Asíncrono (Celery + Redis)
 

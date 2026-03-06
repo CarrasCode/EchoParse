@@ -47,7 +47,9 @@ repos:
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
+        exclude: 'Backend/alembic/versions/'
       - id: trailing-whitespace
-      # Muy útil en Django para evitar commitear migraciones conflictivas
+        exclude: 'Backend/alembic/versions/'
+      # # Evita commitear archivos con conflictos de merge sin resolver
       - id: check-merge-conflict
       - id: check-added-large-files

@@ -30,7 +30,7 @@ RUN apt-get update && \
 
 WORKDIR /code
 # Copia el código de la aplicación
-COPY app ./app
+COPY . .
 # Copia las librerias instaladas sobrescribiendo por si copiamos las otras sin querer
 COPY --from=builder /code/.venv /code/.venv
 
