@@ -40,12 +40,12 @@ Este documento mantiene el estado global del proyecto.
   - [x] Inyectar `DATABASE_URL` desde `pydantic-settings` (sin hardcodear).
   - [x] Actualizar `Dockerfile` (`COPY . .`) y `docker-compose.yml` (volume mount completo con protección de `.venv`).
 
-## Fase 3: El Músculo Asíncrono (Celery + Redis)
+## Fase 3: El Músculo Asíncrono (ARQ + Redis)
 
-- [ ] Crear el contenedor del Worker (Celery) en el `docker-compose.yml`.
-- [ ] Configurar Celery en el backend.
-- [ ] Hacer que el endpoint de la Fase 2 envíe un mensaje a Redis.
-- [ ] El Worker debe recoger el mensaje, cambiar el estado en BD a `PROCESSING`, hacer un `time.sleep(10)` (simulando trabajo) y cambiarlo a `COMPLETED`.
+- [x] Crear el contenedor del Worker (ARQ) en el `docker-compose.yml`.
+- [x] Configurar ARQ en el backend (WorkerSettings y redis pool).
+- [x] Hacer que el endpoint de la Fase 2 encole un trabajo (`enqueue_job`) en Redis.
+- [x] El Worker debe recoger el mensaje, simular trabajo con `asyncio.sleep(10)` y procesarlo de forma asíncrona.
 
 ## Fase 4: El Cerebro (IA - OpenAI Whisper)
 

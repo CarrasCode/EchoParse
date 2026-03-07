@@ -5,7 +5,8 @@ from arq import ArqRedis
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.database import SessionLocal, get_redis_pool
+from ..core.database import SessionLocal
+from ..core.redis import get_redis_pool
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
