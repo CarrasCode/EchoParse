@@ -4,7 +4,7 @@ import uuid
 import aiofiles
 from fastapi import APIRouter, HTTPException, UploadFile
 
-from ...api.dependencies import SessionDep
+from ...api.dependencies import ArqDep, SessionDep
 from ...core.config import settings
 from ..transcriptions.schemas import TranscriptionReturn
 from ..transcriptions.service import create_transcription_bd
@@ -15,7 +15,7 @@ os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/", response_model=TranscriptionReturn)
-async def create_transcription(file: UploadFile, db: SessionDep):
+async def create_transcription(file: UploadFile, db: SessionDep, arq: ArqDep):
     max_size = 50 * 1024 * 1024
     longitud = file.size
     type = file.content_type
@@ -43,4 +43,5 @@ async def create_transcription(file: UploadFile, db: SessionDep):
         await db.rollback()
         raise HTTPException(status_code=500, detail="No se pudo escribir el archivo") from None
     await db.commit()
+    _ = await arq.enqueue_job("process_audio_task", new_id)
     return result

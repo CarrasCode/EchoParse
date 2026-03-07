@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from arq.connections import RedisSettings
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -26,8 +27,13 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def broker_url(self) -> str:
-        return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+    def arq_redis_settings(self) -> RedisSettings:
+        return RedisSettings(
+            host=self.REDIS_HOST,
+            port=self.REDIS_PORT,
+            password=self.REDIS_PASSWORD,
+            database=0,
+        )
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]
