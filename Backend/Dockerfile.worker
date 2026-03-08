@@ -15,7 +15,7 @@ WORKDIR /code
 COPY pyproject.toml uv.lock ./
 
 # Instala las dependencias en el entorno global del sistema (ya que estamos dentro de un contenedor)
-RUN uv sync --frozen --no-cache --no-install-project
+RUN uv sync --no-dev --extra worker --frozen --no-cache --no-install-project
 
 FROM python:3.12-slim
 
@@ -26,6 +26,7 @@ ENV PYTHONUNBUFFERED=1
 # 2. Instala ÚNICAMENTE curl en la imagen final para los healthchecks
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
+    apt-get install -y ffmpeg  && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
@@ -36,9 +37,7 @@ COPY --from=builder /code/.venv /code/.venv
 
 # Asigna la variables de entorno para poder ejecutar el uvicorn
 ENV PATH="/code/.venv/bin:$PATH"
-# Expone el puerto donde se ejecutará FastAPI
-EXPOSE 8000
 
 
-# Comando para ejecutar la aplicación usando uvicorn a través de uv
-CMD ["uvicorn", "app.main:app", "--reload","--host", "0.0.0.0", "--port", "8000"]
+# Comando para ejecutar la aplicación usando arq
+CMD ["arq", "app.worker.arq_worker.WorkerSettings"]
