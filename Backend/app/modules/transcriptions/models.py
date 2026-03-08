@@ -12,6 +12,7 @@ class StatusTranscription(StrEnum):
     PENDING = "PENDING"
     PROCESSING = "PROCESSING"
     DONE = "DONE"
+    FAIL = "FAIL"
 
 
 class TranscriptionJob(Base):
