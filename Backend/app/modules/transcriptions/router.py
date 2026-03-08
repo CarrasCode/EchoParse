@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException, UploadFile
 
 from ...api.dependencies import ArqDep, SessionDep
 from ...core.config import settings
-from ..transcriptions.schemas import TranscriptionReturn
-from ..transcriptions.service import create_transcription_bd
+from ..transcriptions.schemas import TranscriptionDetail, TranscriptionReturn
+from ..transcriptions.service import create_transcription_bd, get_transcription_bd
 
 router = APIRouter(prefix="/transcriptions", tags=["Transcriptions"])
 
@@ -45,3 +45,11 @@ async def create_transcription(file: UploadFile, db: SessionDep, arq: ArqDep):
     await db.commit()
     _ = await arq.enqueue_job("process_audio_task", new_id)
     return result
+
+
+@router.get("/{id}", response_model=TranscriptionDetail)
+async def get_transcription(id: uuid.UUID, bd: SessionDep):
+    transcription = await get_transcription_bd(id, bd)
+    if not transcription:
+        raise HTTPException(404, "Transcripcion no encontrada")
+    return transcription

@@ -56,6 +56,6 @@ Este documento mantiene el estado global del proyecto.
 
 ## Fase 5: El Rostro (Frontend e Integración)
 
-- [ ] Crear un endpoint `GET /api/v1/transcriptions/{id}` para consultar el estado.
+- [x] Crear un endpoint `GET /api/v1/transcriptions/{id}` para consultar el estado.
 - [ ] (Opcional) Crear un endpoint de WebSockets para enviar el progreso en tiempo real.
 - [ ] Desarrollar el frontend (Angular) que suba el archivo y muestre el texto al terminar.
