@@ -49,10 +49,10 @@ Este documento mantiene el estado global del proyecto.
 
 ## Fase 4: El Cerebro (IA - OpenAI Whisper)
 
-- [ ] Ajustar el `Dockerfile` del Worker para instalar dependencias de sistema (FFmpeg).
-- [ ] Integrar la librería `openai-whisper` en la tarea de Celery.
-- [ ] Procesar el archivo de audio real y guardar el texto generado en la base de datos.
-- [ ] Implementar manejo de errores (bloques `try/except`) para que si la IA falla, la BD cambie a estado `FAILED`.
+- [x] Ajustar el `Dockerfile` del Worker para instalar dependencias de sistema (FFmpeg).
+- [x] Integrar la librería `openai-whisper` en la tarea de Celery.
+- [x] Procesar el archivo de audio real y guardar el texto generado en la base de datos.
+- [x] Implementar manejo de errores (bloques `try/except`) para que si la IA falla, la BD cambie a estado `FAILED`.
 
 ## Fase 5: El Rostro (Frontend e Integración)
 
