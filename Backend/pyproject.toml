@@ -1,7 +1,7 @@
 [project]
 name = "echoparse-backend"
 version = "0.1.0"
-description = "API asíncrona para transcripción de audio con FastAPI, Celery y Whisper"
+description = "API asíncrona para transcripción de audio con FastAPI, Arq y Whisper"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -24,7 +24,7 @@ dev = [
 ]
 [project.optional-dependencies]
 worker = [
-    "openai-whisper"
+    "openai-whisper>=20250625",
 ]
 
 

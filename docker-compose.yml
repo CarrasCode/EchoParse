@@ -1,6 +1,8 @@
 services:
   app:
-    build: ./Backend/Dockerfile.api
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.api
     container_name: echoparse-backend
     env_file:
       - .env
@@ -62,7 +64,9 @@ services:
     networks:
       - echoparse-network
   worker:
-    build: ./Backend/Dockerfile.worker
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.worker
     container_name: echoparse-worker
     env_file:
       - .env
