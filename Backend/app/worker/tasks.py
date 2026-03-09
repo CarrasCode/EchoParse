@@ -19,6 +19,15 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+# Wrapper para transcribir audio
+def transcribe_audio(model: whisper.Whisper, file_path: str, lang: str) -> str:
+    result = model.transcribe(file_path, language=lang)
+    assert isinstance(result, dict)
+    text = result.get("text")
+    assert isinstance(text, str)
+    return text
+
+
 async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
     model = ctx.get("whisper_model")
     assert isinstance(model, whisper.Whisper)
@@ -38,11 +47,7 @@ async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
     transcription_text: str | None = None
     final_status: StatusTranscription = StatusTranscription.FAIL
     try:
-        result = await asyncio.to_thread(model.transcribe, job.file_path, language="es")
-        assert isinstance(result, dict)
-        text = result.get("text")
-        assert isinstance(text, str)
-        transcription_text = text
+        transcription_text = await asyncio.to_thread(transcribe_audio, model, job.file_path, "es")
         final_status = StatusTranscription.DONE
     except Exception as e:
         logger.error(f"No se pudo transcribir el archivo {job_id}: {e}")
