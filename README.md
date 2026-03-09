@@ -57,5 +57,14 @@ Este documento mantiene el estado global del proyecto.
 ## Fase 5: El Rostro (Frontend e Integración)
 
 - [x] Crear un endpoint `GET /api/v1/transcriptions/{id}` para consultar el estado.
-- [ ] (Opcional) Crear un endpoint de WebSockets para enviar el progreso en tiempo real.
+- [ ] Crear un endpoint de WebSockets para notificar el progreso en tiempo real (usando Redis Pub/Sub).
 - [ ] Desarrollar el frontend (Angular) que suba el archivo y muestre el texto al terminar.
+
+## Fase 6: Robustez y Escalabilidad (Production-Ready)
+
+- [ ] **Endpoint de Listado:** Crear `GET /api/v1/transcriptions/` con paginación (`limit`, `offset`) y filtrado por estado.
+- [ ] **Cancelación de Trabajos:** Crear `DELETE /api/v1/transcriptions/{id}` para cancelar trabajos encolados o en proceso en ARQ.
+- [ ] **Webhooks:** Permitir a usuarios de la API registrar una URL (Webhook) para recibir notificaciones HTTP cuando la transcripción termine, sin usar WebSockets.
+- [ ] **Manejo de Disco y Retención:** Crear una tarea periódica (Cron job en ARQ) que limpie audios y transcripciones con más de X días de antigüedad (Soft-Delete o Hard-Delete).
+- [ ] **Seguridad y Validación Avanzada:** Proteger la API con _Rate Limiting_ y validar archivos usando _Magic Numbers_ (evitando que suban ejecutables renombrados a `.mp3`).
+- [ ] **Dockerización Avanzada (Multi-stage):** Reestructurar el `Dockerfile` usando Multi-stage builds para separar entornos de desarrollo (con herramientas de testing) y entornos seguros de producción.
