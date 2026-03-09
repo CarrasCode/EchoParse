@@ -19,3 +19,10 @@ class TranscriptionDetail(BaseModel):
     status: StatusTranscription
     transcript: str | None
     created_at: datetime.datetime
+
+
+class TranscriptionUpdate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    status: StatusTranscription
+    transcript: str | None
