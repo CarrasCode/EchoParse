@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
@@ -30,7 +32,6 @@ def transcribe_audio(model: whisper.Whisper, file_path: str, lang: str) -> str:
 
 async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
     model = ctx.get("whisper_model")
-    assert isinstance(model, whisper.Whisper)
     redis = ctx.get("redis")
     assert isinstance(redis, ArqRedis)
 
@@ -42,7 +43,10 @@ async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
 
         job.status = StatusTranscription.PROCESSING
         await db_session.commit()
-        await redis.publish(f"channel:transcription:{job_id}", json.dumps({"status": job.status}))
+        await redis.publish(
+            f"channel:transcription:{job_id}",
+            json.dumps({"status": job.status, "id": str(job_id)}),
+        )
 
     transcription_text: str | None = None
     final_status: StatusTranscription = StatusTranscription.FAIL
@@ -62,5 +66,5 @@ async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
         await db_session.commit()
         await redis.publish(
             f"channel:transcription:{job_id}",
-            json.dumps({"status": job.status, "transcript": job.transcript}),
+            json.dumps({"status": job.status, "id": str(job_id), "transcript": job.transcript}),
         )
