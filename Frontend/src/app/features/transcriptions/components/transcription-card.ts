@@ -35,16 +35,13 @@ import { TranscriptionJob } from "../models/transcription";
             class="bg-blue-600 h-2 rounded-full w-full animate-pulse-fast"
           ></div>
         </div>
-      } @else if (job().status === "COMPLETED" || job().status === "DONE") {
+      } @else if (job().status === "DONE") {
         <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
           <div class="bg-green-600 h-2 rounded-full w-full"></div>
         </div>
       }
 
-      @if (
-        (job().status === "COMPLETED" || job().status === "DONE") &&
-        job().content
-      ) {
+      @if (job().status === "DONE" && job().content) {
         <div
           class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700 max-h-32 overflow-y-auto"
         >
