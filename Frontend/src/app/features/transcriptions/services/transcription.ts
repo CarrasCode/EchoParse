@@ -1,7 +1,10 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { TranscriptionJob } from "../models/transcription";
+import {
+  PaginatedTranscriptions,
+  TranscriptionJob,
+} from "../models/transcription";
 
 @Injectable({
   providedIn: "root",
@@ -20,8 +23,8 @@ export class TranscriptionService {
     return this.http.get<TranscriptionJob>(`${this.apiUrl}/${id}`);
   }
 
-  getAll(limit = 10, offset = 0): Observable<TranscriptionJob[]> {
-    return this.http.get<TranscriptionJob[]>(this.apiUrl, {
+  getAll(limit = 10, offset = 0): Observable<PaginatedTranscriptions> {
+    return this.http.get<PaginatedTranscriptions>(this.apiUrl, {
       params: { limit: limit.toString(), offset: offset.toString() },
     });
   }
