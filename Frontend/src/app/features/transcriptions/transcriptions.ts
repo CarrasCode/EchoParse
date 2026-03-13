@@ -35,6 +35,11 @@ export class TranscriptionsComponent implements OnInit {
   private readonly webSocketService = inject(WebSocketService);
 
   readonly jobs = signal<TranscriptionJob[]>([]);
+  readonly total = signal(0);
+  readonly limit = signal(10);
+  readonly offset = signal(0);
+  readonly expandedId = signal<string | null>(null);
+  readonly loadingDetailIds = signal<string[]>([]);
   readonly error = signal<string | null>(null);
 
   ngOnInit() {
@@ -42,11 +47,47 @@ export class TranscriptionsComponent implements OnInit {
     this.listenToWebSockets();
   }
 
-  private loadHistory() {
-    this.transcriptionService.getAll().subscribe({
+  onPageChange(nextOffset: number): void {
+    this.loadHistory(nextOffset);
+  }
+
+  onToggleJob(job: TranscriptionJob): void {
+    if (this.expandedId() === job.id) {
+      this.expandedId.set(null);
+      return;
+    }
+
+    this.expandedId.set(job.id);
+
+    if (job.status === "DONE" && !job.transcript) {
+      this.loadingDetailIds.update((ids) => [...ids, job.id]);
+      this.transcriptionService.getById(job.id).subscribe({
+        next: (detail) => {
+          this.jobs.update((current) =>
+            current.map((j) =>
+              j.id === detail.id ? { ...j, transcript: detail.transcript } : j,
+            ),
+          );
+          this.loadingDetailIds.update((ids) =>
+            ids.filter((id) => id !== job.id),
+          );
+        },
+        error: () => {
+          this.loadingDetailIds.update((ids) =>
+            ids.filter((id) => id !== job.id),
+          );
+        },
+      });
+    }
+  }
+
+  private loadHistory(offset = this.offset()) {
+    this.transcriptionService.getAll(this.limit(), offset).subscribe({
       next: (history) => {
-        this.jobs.set(history);
-        history.forEach((job) => {
+        this.jobs.set(history.items);
+        this.total.set(history.total);
+        this.offset.set(history.offset);
+        history.items.forEach((job) => {
           if (job.status === "PENDING" || job.status === "PROCESSING") {
             this.connectWebSocket(job.id);
           }
@@ -64,7 +105,7 @@ export class TranscriptionsComponent implements OnInit {
             return {
               ...job,
               status: msg.data.status,
-              content: msg.data.transcript || job.content,
+              transcript: msg.data.transcript || job.transcript,
             };
           }
           return job;
@@ -85,6 +126,7 @@ export class TranscriptionsComponent implements OnInit {
     this.transcriptionService.upload(file).subscribe({
       next: (job) => {
         this.jobs.update((current) => [job, ...current]);
+        this.total.update((t) => t + 1);
         this.connectWebSocket(job.id);
       },
       error: (err) => {
