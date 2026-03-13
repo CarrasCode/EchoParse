@@ -36,7 +36,8 @@ import { TranscriptionCardComponent } from "./transcription-card";
           </button>
           <span class="text-sm text-gray-600">
             Showing {{ offset() + 1 }} -
-            {{ Math.min(offset() + limit(), total()) }} of {{ total() }}
+            {{ Math.min(offset() + limit(), total()) }} of
+            {{ total() }}
           </span>
           <button
             (click)="nextPage()"
