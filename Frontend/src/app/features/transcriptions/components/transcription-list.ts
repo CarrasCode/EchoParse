@@ -21,7 +21,7 @@ import { TranscriptionCardComponent } from "./transcription-card";
               [job]="job"
               [expanded]="expandedId() === job.id"
               [loadingDetail]="loadingDetailIds().includes(job.id)"
-              (toggle)="jobToggle.emit(job)"
+              (toggleExpand)="jobToggle.emit(job)"
             />
           }
         </div>

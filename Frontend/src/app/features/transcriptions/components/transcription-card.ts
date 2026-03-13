@@ -1,4 +1,4 @@
-import { Component, input } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranscriptionJob } from "../models/transcription";
 
@@ -7,7 +7,14 @@ import { TranscriptionJob } from "../models/transcription";
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div
+      class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer hover:border-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+      (click)="toggleExpand.emit()"
+      (keydown.enter)="toggleExpand.emit()"
+      (keydown.space)="$event.preventDefault(); toggleExpand.emit()"
+      role="button"
+      tabindex="0"
+    >
       <div class="flex justify-between items-start mb-2">
         <div>
           <h3 class="font-medium text-gray-900">{{ job().filename }}</h3>
@@ -41,16 +48,33 @@ import { TranscriptionJob } from "../models/transcription";
         </div>
       }
 
-      @if (job().status === "DONE" && job().content) {
+      @if (job().status === "DONE") {
         <div
-          class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700 max-h-32 overflow-y-auto"
+          class="mt-2 flex justify-between items-center text-xs font-medium text-blue-600"
         >
-          {{ job().content }}
+          <span>{{ expanded() ? "Hide transcript" : "Show transcript" }}</span>
+          @if (loadingDetail()) {
+            <span class="animate-pulse">Loading...</span>
+          }
         </div>
+
+        @if (expanded() && job().transcript) {
+          <div
+            class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700 max-h-60 overflow-y-auto"
+            (click)="$event.stopPropagation()"
+            (keydown)="$event.stopPropagation()"
+            role="presentation"
+          >
+            {{ job().transcript }}
+          </div>
+        }
       }
     </div>
   `,
 })
 export class TranscriptionCardComponent {
   readonly job = input.required<TranscriptionJob>();
+  readonly expanded = input<boolean>(false);
+  readonly loadingDetail = input<boolean>(false);
+  readonly toggleExpand = output<void>();
 }
