@@ -26,3 +26,11 @@ class TranscriptionUpdate(BaseModel):
     status: StatusTranscription
     id: uuid.UUID | None = None
     transcript: str | None = None
+
+
+class PaginatedTranscriptions(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    items: list[TranscriptionDetail]
+    total: int
+    limit: int
+    offset: int

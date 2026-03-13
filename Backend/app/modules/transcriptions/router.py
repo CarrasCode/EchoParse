@@ -1,19 +1,32 @@
 import json
 import os
 import uuid
+from typing import Annotated
 
 import aiofiles
-from fastapi import APIRouter, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Query,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from pydantic import ValidationError
 
 from ...api.dependencies import ArqDep, SessionDep
 from ...core.config import settings
 from ..transcriptions.schemas import (
+    PaginatedTranscriptions,
     TranscriptionDetail,
     TranscriptionReturn,
     TranscriptionUpdate,
 )
-from ..transcriptions.service import create_transcription_bd, get_transcription_bd
+from ..transcriptions.service import (
+    create_transcription_bd,
+    get_all_transcriptions_bd,
+    get_transcription_bd,
+)
 from .models import StatusTranscription
 
 router = APIRouter(prefix="/transcriptions", tags=["Transcriptions"])
@@ -52,6 +65,23 @@ async def create_transcription(file: UploadFile, db: SessionDep, arq: ArqDep):
     await db.commit()
     _ = await arq.enqueue_job("process_audio_task", new_id)
     return result
+
+
+@router.get("/", response_model=PaginatedTranscriptions)
+async def get_all_transcriptions(
+    bd: SessionDep,
+    limit: Annotated[int, Query(0, ge=1, le=50)] = 10,
+    offset: Annotated[int, Query(0, ge=0)] = 0,
+):
+
+    transcriptions, count = await get_all_transcriptions_bd(bd, limit, offset)
+    transcriptions_list = [TranscriptionDetail.model_validate(t) for t in transcriptions]
+    return PaginatedTranscriptions(
+        items=transcriptions_list,
+        total=count,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/{id}", response_model=TranscriptionDetail)

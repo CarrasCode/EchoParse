@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import TranscriptionJob
@@ -17,3 +18,14 @@ async def create_transcription_bd(id: uuid.UUID, db: AsyncSession, file_name: st
 async def get_transcription_bd(id: uuid.UUID, bd: AsyncSession):
     transcription = await bd.get(TranscriptionJob, id)
     return transcription
+
+
+async def get_all_transcriptions_bd(bd: AsyncSession, limit: int, offset: int):
+    transcriptions = await bd.execute(
+        select(TranscriptionJob)
+        .limit(limit)
+        .offset(offset)
+        .order_by(TranscriptionJob.created_at.desc())
+    )
+    count = await bd.execute(select(func.count(TranscriptionJob.id)))
+    return transcriptions.scalars().all(), count.scalar_one()
