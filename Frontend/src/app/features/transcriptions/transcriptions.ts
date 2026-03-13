@@ -25,7 +25,16 @@ import { TranscriptionListComponent } from "./components/transcription-list";
           </div>
         }
 
-        <app-transcription-list [jobs]="jobs()" />
+        <app-transcription-list
+          [jobs]="jobs()"
+          [total]="total()"
+          [limit]="limit()"
+          [offset]="offset()"
+          [expandedId]="expandedId()"
+          [loadingDetailIds]="loadingDetailIds()"
+          (pageChange)="onPageChange($event)"
+          (jobToggle)="onToggleJob($event)"
+        />
       </main>
     </div>
   `,
