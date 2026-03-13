@@ -70,8 +70,8 @@ async def create_transcription(file: UploadFile, db: SessionDep, arq: ArqDep):
 @router.get("/", response_model=PaginatedTranscriptions)
 async def get_all_transcriptions(
     bd: SessionDep,
-    limit: Annotated[int, Query(0, ge=1, le=50)] = 10,
-    offset: Annotated[int, Query(0, ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ):
 
     transcriptions, count = await get_all_transcriptions_bd(bd, limit, offset)
