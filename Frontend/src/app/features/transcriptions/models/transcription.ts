@@ -2,8 +2,15 @@ export type TranscriptionStatus = "PENDING" | "PROCESSING" | "DONE" | "FAIL";
 
 export interface TranscriptionJob {
   id: string;
-  filename: string;
+  filename?: string;
   status: TranscriptionStatus;
-  content?: string;
-  created_at: string;
+  transcript?: string | null;
+  created_at?: string;
+}
+
+export interface PaginatedTranscriptions {
+  items: TranscriptionJob[];
+  total: number;
+  limit: number;
+  offset: number;
 }
