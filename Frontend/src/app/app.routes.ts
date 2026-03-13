@@ -1,3 +1,11 @@
-import { Routes } from '@angular/router';
+import { Routes } from "@angular/router";
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: "",
+    loadComponent: () =>
+      import("./features/transcriptions/transcriptions").then(
+        (m) => m.TranscriptionsComponent,
+      ),
+  },
+];

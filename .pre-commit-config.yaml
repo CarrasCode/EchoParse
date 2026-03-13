@@ -20,7 +20,7 @@ repos:
     hooks:
       - id: angular-eslint
         name: angular-eslint
-        entry: bash -c "cd Frontend && pnpm exec eslint --fix"
+        entry: bash -c 'cd Frontend && pnpm exec eslint --fix "${@#Frontend/}"' --
         language: system
         types_or: [ts, html]
         files: ^Frontend/

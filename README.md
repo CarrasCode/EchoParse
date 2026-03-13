@@ -57,8 +57,8 @@ Este documento mantiene el estado global del proyecto.
 ## Fase 5: El Rostro (Frontend e Integración)
 
 - [x] Crear un endpoint `GET /api/v1/transcriptions/{id}` para consultar el estado.
-- [ ] Crear un endpoint de WebSockets para notificar el progreso en tiempo real (usando Redis Pub/Sub).
-- [ ] Desarrollar el frontend (Angular) que suba el archivo y muestre el texto al terminar.
+- [x] Crear un endpoint de WebSockets para notificar el progreso en tiempo real (usando Redis Pub/Sub).
+- [x] Desarrollar el frontend (Angular) que suba el archivo y muestre el texto al terminar.
 
 ## Fase 6: Robustez y Escalabilidad (Production-Ready)
 
