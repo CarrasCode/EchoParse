@@ -3,7 +3,7 @@ import { Subject } from "rxjs";
 
 export interface WebSocketMessage {
   ticketId: string;
-  data: any;
+  data: unknown;
 }
 
 @Injectable({

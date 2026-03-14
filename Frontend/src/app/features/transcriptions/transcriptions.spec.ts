@@ -2,7 +2,7 @@ import { TestBed } from "@angular/core/testing";
 import { TranscriptionsComponent } from "./transcriptions";
 import { TranscriptionService } from "./services/transcription";
 import { WebSocketService } from "../../core/services/web-socket";
-import { of, Subject } from "rxjs";
+import { Observable, of, Subject } from "rxjs";
 
 describe("TranscriptionsComponent", () => {
   let component: TranscriptionsComponent;
@@ -12,7 +12,7 @@ describe("TranscriptionsComponent", () => {
     upload: ReturnType<typeof vi.fn>;
   };
   let webSocketServiceMock: {
-    messages$: Subject<unknown>;
+    messages$: Observable<unknown>;
     connect: ReturnType<typeof vi.fn>;
     disconnect: ReturnType<typeof vi.fn>;
   };
