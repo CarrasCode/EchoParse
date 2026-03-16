@@ -1,4 +1,4 @@
-import { Component, OnDestroy, output } from "@angular/core";
+import { Component, OnDestroy, output, signal } from "@angular/core";
 
 @Component({
   selector: "app-upload-area",
@@ -61,7 +61,7 @@ import { Component, OnDestroy, output } from "@angular/core";
               type="button"
               class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
               (click)="startRecording()"
-              [disabled]="isRecording"
+              [disabled]="isRecording()"
             >
               Start recording
             </button>
@@ -69,14 +69,14 @@ import { Component, OnDestroy, output } from "@angular/core";
               type="button"
               class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
               (click)="stopRecording()"
-              [disabled]="!isRecording"
+              [disabled]="!isRecording()"
             >
               Stop
             </button>
           </div>
         </div>
 
-        @if (isRecording) {
+        @if (isRecording()) {
           <div
             class="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
@@ -84,15 +84,15 @@ import { Component, OnDestroy, output } from "@angular/core";
           </div>
         }
 
-        @if (errorMessage) {
+        @if (errorMessage()) {
           <div
             class="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
-            {{ errorMessage }}
+            {{ errorMessage() }}
           </div>
         }
 
-        @if (previewUrl) {
+        @if (previewUrl()) {
           <div
             class="mt-4 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
           >
@@ -103,7 +103,7 @@ import { Component, OnDestroy, output } from "@angular/core";
               </p>
             </div>
 
-            <audio class="w-full" controls [src]="previewUrl"></audio>
+            <audio class="w-full" controls [src]="previewUrl()"></audio>
 
             <div class="flex flex-wrap gap-2">
               <button
@@ -117,7 +117,7 @@ import { Component, OnDestroy, output } from "@angular/core";
                 type="button"
                 class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
                 (click)="sendRecording()"
-                [disabled]="!recordedFile"
+                [disabled]="!recordedFile()"
               >
                 Send recording
               </button>
@@ -135,10 +135,10 @@ export class UploadAreaComponent implements OnDestroy {
   private mediaStream: MediaStream | null = null;
   private recordedChunks: Blob[] = [];
 
-  protected previewUrl: string | null = null;
-  protected recordedFile: File | null = null;
-  protected isRecording = false;
-  protected errorMessage: string | null = null;
+  protected previewUrl = signal<string | null>(null);
+  protected recordedFile = signal<File | null>(null);
+  protected isRecording = signal(false);
+  protected errorMessage = signal<string | null>(null);
 
   ngOnDestroy(): void {
     this.stopMediaStream();
@@ -174,10 +174,12 @@ export class UploadAreaComponent implements OnDestroy {
   }
 
   async startRecording(): Promise<void> {
-    this.errorMessage = null;
+    this.errorMessage.set(null);
 
     if (!this.isRecordingSupported()) {
-      this.errorMessage = "Your browser does not support microphone recording.";
+      this.errorMessage.set(
+        "Your browser does not support microphone recording.",
+      );
       return;
     }
 
@@ -201,27 +203,27 @@ export class UploadAreaComponent implements OnDestroy {
       };
 
       this.mediaRecorder.onstop = () => {
-        this.isRecording = false;
+        this.isRecording.set(false);
         this.buildRecordingFile();
         this.stopMediaStream();
       };
 
       this.mediaRecorder.onerror = () => {
-        this.errorMessage = "Recording failed. Please try again.";
-        this.isRecording = false;
+        this.errorMessage.set("Recording failed. Please try again.");
+        this.isRecording.set(false);
         this.stopMediaStream();
       };
 
       this.mediaRecorder.start();
-      this.isRecording = true;
+      this.isRecording.set(true);
     } catch {
-      this.errorMessage = "Microphone access was denied or is unavailable.";
+      this.errorMessage.set("Microphone access was denied or is unavailable.");
       this.stopMediaStream();
     }
   }
 
   stopRecording(): void {
-    if (!this.mediaRecorder || !this.isRecording) {
+    if (!this.mediaRecorder || !this.isRecording()) {
       return;
     }
 
@@ -229,22 +231,23 @@ export class UploadAreaComponent implements OnDestroy {
   }
 
   discardRecording(): void {
-    if (this.isRecording) {
+    if (this.isRecording()) {
       this.stopRecording();
     }
 
     this.recordedChunks = [];
-    this.recordedFile = null;
+    this.recordedFile.set(null);
     this.clearPreview();
-    this.errorMessage = null;
+    this.errorMessage.set(null);
   }
 
   sendRecording(): void {
-    if (!this.recordedFile) {
+    const file = this.recordedFile();
+    if (!file) {
       return;
     }
 
-    this.fileSelected.emit(this.recordedFile);
+    this.fileSelected.emit(file);
     this.discardRecording();
   }
 
@@ -264,7 +267,7 @@ export class UploadAreaComponent implements OnDestroy {
 
   private buildRecordingFile(): void {
     if (this.recordedChunks.length === 0) {
-      this.errorMessage = "No audio was captured. Please try again.";
+      this.errorMessage.set("No audio was captured. Please try again.");
       return;
     }
 
@@ -276,21 +279,21 @@ export class UploadAreaComponent implements OnDestroy {
     const blob = new Blob(this.recordedChunks, { type: mimeType });
 
     this.clearPreview();
-    this.previewUrl = URL.createObjectURL(blob);
-    this.recordedFile = new File(
-      [blob],
-      `recording-${Date.now()}.${extension}`,
-      {
+    const newPreviewUrl = URL.createObjectURL(blob);
+    this.previewUrl.set(newPreviewUrl);
+    this.recordedFile.set(
+      new File([blob], `recording-${Date.now()}.${extension}`, {
         type: mimeType,
-      },
+      }),
     );
   }
 
   private clearPreview(): void {
-    if (this.previewUrl) {
-      URL.revokeObjectURL(this.previewUrl);
+    const currentUrl = this.previewUrl();
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
     }
-    this.previewUrl = null;
+    this.previewUrl.set(null);
   }
 
   private stopMediaStream(): void {

@@ -11,7 +11,7 @@ import {
 })
 export class TranscriptionService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = "/api/v1/transcriptions";
+  private readonly apiUrl = "/api/v1/transcriptions/";
 
   upload(file: File): Observable<TranscriptionJob> {
     const formData = new FormData();
@@ -20,12 +20,16 @@ export class TranscriptionService {
   }
 
   getById(id: string): Observable<TranscriptionJob> {
-    return this.http.get<TranscriptionJob>(`${this.apiUrl}/${id}`);
+    return this.http.get<TranscriptionJob>(`${this.apiUrl}${id}`);
   }
 
   getAll(limit = 10, offset = 0): Observable<PaginatedTranscriptions> {
     return this.http.get<PaginatedTranscriptions>(this.apiUrl, {
       params: { limit: limit.toString(), offset: offset.toString() },
     });
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${id}`);
   }
 }

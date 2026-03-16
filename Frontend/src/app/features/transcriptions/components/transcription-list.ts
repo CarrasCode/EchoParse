@@ -22,6 +22,7 @@ import { TranscriptionCardComponent } from "./transcription-card";
               [expanded]="expandedId() === job.id"
               [loadingDetail]="loadingDetailIds().includes(job.id)"
               (toggleExpand)="jobToggle.emit(job)"
+              (deleteJob)="jobDelete.emit($event)"
             />
           }
         </div>
@@ -61,6 +62,7 @@ export class TranscriptionListComponent {
 
   readonly pageChange = output<number>();
   readonly jobToggle = output<TranscriptionJob>();
+  readonly jobDelete = output<TranscriptionJob>();
 
   protected readonly Math = Math;
 

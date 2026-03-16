@@ -34,6 +34,7 @@ import { TranscriptionListComponent } from "./components/transcription-list";
           [loadingDetailIds]="loadingDetailIds()"
           (pageChange)="onPageChange($event)"
           (jobToggle)="onToggleJob($event)"
+          (jobDelete)="onDeleteJob($event)"
         />
       </main>
     </div>
@@ -85,6 +86,32 @@ export class TranscriptionsComponent implements OnInit {
           this.loadingDetailIds.update((ids) =>
             ids.filter((id) => id !== job.id),
           );
+        },
+      });
+    }
+  }
+
+  onDeleteJob(job: TranscriptionJob): void {
+    if (
+      confirm(
+        `Are you sure you want to delete the transcription "${job.filename}"?`,
+      )
+    ) {
+      this.transcriptionService.delete(job.id).subscribe({
+        next: () => {
+          this.jobs.update((current) => current.filter((j) => j.id !== job.id));
+          this.total.update((t) => t - 1);
+          if (this.expandedId() === job.id) {
+            this.expandedId.set(null);
+          }
+          // Si nos quedamos sin items en la página actual y no estamos en la primera, volvemos a cargar
+          if (this.jobs().length === 0 && this.offset() > 0) {
+            const newOffset = Math.max(0, this.offset() - this.limit());
+            this.loadHistory(newOffset);
+          }
+        },
+        error: () => {
+          this.error.set("Failed to delete transcription");
         },
       });
     }
