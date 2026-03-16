@@ -110,11 +110,12 @@ export class TranscriptionsComponent implements OnInit {
     this.webSocketService.messages$.subscribe((msg) => {
       this.jobs.update((currentJobs) => {
         return currentJobs.map((job) => {
+          const data = msg.data as TranscriptionJob;
           if (job.id === msg.ticketId) {
             return {
               ...job,
-              status: msg.data.status,
-              transcript: msg.data.transcript || job.transcript,
+              status: data.status,
+              transcript: data.transcript || job.transcript,
             };
           }
           return job;
