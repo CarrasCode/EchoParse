@@ -14,7 +14,7 @@ async def startup(ctx: dict[str, Any]):
     # Import local: solo se ejecuta cuando se llama a esta función (en el Worker)
     import whisper
 
-    model = whisper.load_model("base")
+    model = whisper.load_model(settings.WHISPER_MODEL)
     ctx["whisper_model"] = model
 
 

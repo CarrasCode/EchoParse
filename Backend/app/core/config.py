@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from arq.connections import RedisSettings
 from pydantic import computed_field
@@ -19,6 +20,8 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = f"{BASE_DIR}/data/audios"
     MAX_FILE_SIZE: int = 500 * 1024 * 1024  # 500MB
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
+    WHISPER_MODEL: Literal["tiny", "base", "small", "medium", "large", "turbo"] = "medium"
+    WHISPER_LANGUAGE: str | None = "es"
 
     @computed_field
     @property

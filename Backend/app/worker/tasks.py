@@ -9,6 +9,7 @@ from typing import Any
 
 from arq.connections import ArqRedis
 
+from ..core.config import settings
 from ..core.database import SessionLocal
 from ..modules.transcriptions.models import (
     StatusTranscription,
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 # Wrapper para transcribir audio
-def transcribe_audio(model: whisper.Whisper, file_path: str, lang: str) -> str:
+def transcribe_audio(model: whisper.Whisper, file_path: str, lang: str | None) -> str:
     result = model.transcribe(file_path, language=lang)
     assert isinstance(result, dict)
     text = result.get("text")
@@ -32,6 +33,7 @@ def transcribe_audio(model: whisper.Whisper, file_path: str, lang: str) -> str:
 
 async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
     model = ctx.get("whisper_model")
+    assert model is not None, "Whisper model not initialized"
     redis = ctx.get("redis")
     assert isinstance(redis, ArqRedis)
 
@@ -51,7 +53,12 @@ async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
     transcription_text: str | None = None
     final_status: StatusTranscription = StatusTranscription.FAIL
     try:
-        transcription_text = await asyncio.to_thread(transcribe_audio, model, job.file_path, "es")
+        transcription_text = await asyncio.to_thread(
+            transcribe_audio,
+            typing.cast("whisper.Whisper", model),
+            job.file_path,
+            settings.WHISPER_LANGUAGE,
+        )
         final_status = StatusTranscription.DONE
     except Exception as e:
         logger.error(f"No se pudo transcribir el archivo {job_id}: {e}")
