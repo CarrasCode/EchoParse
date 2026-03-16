@@ -5,11 +5,30 @@
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+![Interfaz de EchoParse](./assets/echoparse.jpg)
+
 > **Tu propia API de transcripción y análisis de audio privada, contenerizada y asíncrona.**
 
 **EchoParse** es una solución de código abierto diseñada para transcribir y analizar archivos de audio (reuniones, podcasts, notas de voz) utilizando el modelo de IA **Whisper** de forma local.
 
 A diferencia de las APIs comerciales que cobran por minuto y requieren enviar tus datos a la nube, EchoParse corre en tu propia infraestructura (o en tu portátil) gracias a **Docker**, garantizando **privacidad total** y **coste cero** por uso.
+
+## Cómo iniciar el proyecto
+
+Para levantar todo el entorno, primero necesitas clonar el repositorio:
+
+```bash
+git clone https://github.com/CarrasCode/EchoParse.git
+cd EchoParse
+```
+
+Una vez ubicado en la raíz del proyecto, con Docker instalado, ejecuta el siguiente comando:
+
+```bash
+docker compose up
+```
+
+Una vez que los contenedores estén en marcha, podrás acceder a la aplicación desde tu navegador en http://localhost:4200/.
 
 # Registro de Tareas - WhisperDock
 
@@ -62,8 +81,8 @@ Este documento mantiene el estado global del proyecto.
 
 ## Fase 6: Robustez y Escalabilidad (Production-Ready)
 
-- [ ] **Endpoint de Listado:** Crear `GET /api/v1/transcriptions/` con paginación (`limit`, `offset`) y filtrado por estado.
-- [ ] **Cancelación de Trabajos:** Crear `DELETE /api/v1/transcriptions/{id}` para cancelar trabajos encolados o en proceso en ARQ.
+- [x] **Endpoint de Listado:** Crear `GET /api/v1/transcriptions/` con paginación (`limit`, `offset`) y filtrado por estado.
+- [x] **Cancelación de Trabajos:** Crear `DELETE /api/v1/transcriptions/{id}` para cancelar trabajos encolados o en proceso en ARQ.
 - [ ] **Webhooks:** Permitir a usuarios de la API registrar una URL (Webhook) para recibir notificaciones HTTP cuando la transcripción termine, sin usar WebSockets.
 - [ ] **Manejo de Disco y Retención:** Crear una tarea periódica (Cron job en ARQ) que limpie audios y transcripciones con más de X días de antigüedad (Soft-Delete o Hard-Delete).
 - [ ] **Seguridad y Validación Avanzada:** Proteger la API con _Rate Limiting_ y validar archivos usando _Magic Numbers_ (evitando que suban ejecutables renombrados a `.mp3`).
