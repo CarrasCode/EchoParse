@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "cache"
     REDIS_PORT: int = 6379
     UPLOAD_DIR: str = f"{BASE_DIR}/data/audios"
-
+    MAX_FILE_SIZE: int = 500 * 1024 * 1024  # 500MB
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
     @computed_field

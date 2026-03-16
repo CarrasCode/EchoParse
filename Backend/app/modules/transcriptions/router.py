@@ -38,14 +38,14 @@ os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
 @router.post("/", response_model=TranscriptionReturn)
 async def create_transcription(file: UploadFile, db: SessionDep, arq: ArqDep):
-    max_size = 50 * 1024 * 1024
-    longitud = file.size
-    type = file.content_type
+    max_size = settings.MAX_FILE_SIZE
+    file_size = file.size
+    file_type = file.content_type
 
-    if not longitud or longitud > max_size:
+    if not file_size or file_size > max_size:
         raise HTTPException(status_code=400, detail="File too big")
 
-    if not type or not type.startswith("audio/"):
+    if not file_type or not file_type.startswith("audio/"):
         raise HTTPException(status_code=400, detail="Only audio")
     if not file.filename:
         raise HTTPException(status_code=400, detail="No name found")
