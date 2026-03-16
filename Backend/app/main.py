@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from Backend.app.core.handlers import setup_exception_handlers
+
 from .api.router import router
 from .core.database import engine
 
@@ -19,6 +21,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+setup_exception_handlers(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=permited_origins,
