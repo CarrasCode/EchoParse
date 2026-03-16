@@ -11,6 +11,7 @@ from fastapi import (
     UploadFile,
     WebSocket,
     WebSocketDisconnect,
+    status,
 )
 from pydantic import ValidationError
 
@@ -24,6 +25,7 @@ from ..transcriptions.schemas import (
 )
 from ..transcriptions.service import (
     create_transcription_bd,
+    delete_transcription_bd,
     get_all_transcriptions_bd,
     get_transcription_bd,
 )
@@ -87,9 +89,13 @@ async def get_all_transcriptions(
 @router.get("/{id}", response_model=TranscriptionDetail)
 async def get_transcription(id: uuid.UUID, bd: SessionDep):
     transcription = await get_transcription_bd(id, bd)
-    if not transcription:
-        raise HTTPException(404, "Transcripcion no encontrada")
     return transcription
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_transcription(id: uuid.UUID, bd: SessionDep):
+    await delete_transcription_bd(id, bd)
+    return None
 
 
 @router.websocket("/ws/{ticket_id}")

@@ -9,6 +9,8 @@ from .models import StatusTranscription
 class TranscriptionReturn(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
+    filename: str
+    created_at: datetime.datetime
     status: StatusTranscription
 
 

@@ -3,6 +3,8 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from Backend.app.core.exceptions import RecordNotFoundError
+
 from .models import TranscriptionJob
 
 
@@ -17,7 +19,15 @@ async def create_transcription_bd(id: uuid.UUID, db: AsyncSession, file_name: st
 
 async def get_transcription_bd(id: uuid.UUID, bd: AsyncSession):
     transcription = await bd.get(TranscriptionJob, id)
+    if not transcription:
+        raise RecordNotFoundError("Transcription not found")
     return transcription
+
+
+async def delete_transcription_bd(id: uuid.UUID, bd: AsyncSession):
+    transcription = await get_transcription_bd(id, bd)
+    await bd.delete(transcription)
+    await bd.commit()
 
 
 async def get_all_transcriptions_bd(bd: AsyncSession, limit: int, offset: int):
