@@ -3,8 +3,7 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from Backend.app.core.exceptions import RecordNotFoundError
-
+from ...core.exceptions import RecordNotFoundError
 from .models import TranscriptionJob
 
 
