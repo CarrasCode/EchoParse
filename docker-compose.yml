@@ -1,4 +1,23 @@
 services:
+  migrate:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.api
+    container_name: echoparse-migrations
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./Backend/:/code/ # General: monta TODO
+      - /code/.venv # Específico: "protege" .venv
+      - backend_data:/code/data # Específico: "protege" data
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    networks:
+      - echoparse-network
+
   app:
     build:
       context: ./Backend
@@ -13,6 +32,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test:
         ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
@@ -75,6 +96,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - ./Backend/:/code/ # General: monta TODO
       - /code/.venv # Específico: "protege" .venv
