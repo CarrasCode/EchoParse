@@ -24,10 +24,12 @@ class TranscriptionDetail(BaseModel):
 
 
 class TranscriptionUpdate(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, extra="allow")
     status: StatusTranscription
     id: uuid.UUID | None = None
     transcript: str | None = None
+    progress: float | None = None
+    new_text: str | None = None
 
 
 class PaginatedTranscriptions(BaseModel):

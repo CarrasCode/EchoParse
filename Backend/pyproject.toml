@@ -24,7 +24,7 @@ dev = [
 ]
 [project.optional-dependencies]
 worker = [
-    "openai-whisper>=20250625",
+    "faster-whisper>=1.2.1",
 ]
 
 [tool.pyright]
