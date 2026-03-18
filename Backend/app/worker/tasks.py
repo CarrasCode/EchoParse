@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import typing
 import uuid
 from typing import Any
@@ -29,7 +30,11 @@ def transcribe_audio_sync(
     loop: asyncio.AbstractEventLoop,
     queue: asyncio.Queue[dict[str, Any] | None],
 ):
+    logger.info(f"Iniciando transcripción en hilo: {file_path}")
     try:
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Archivo no encontrado: {file_path}")
+
         segments, info = model.transcribe(
             file_path,
             language=settings.WHISPER_LANGUAGE,
@@ -37,23 +42,42 @@ def transcribe_audio_sync(
             beam_size=settings.WHISPER_BEAM_SIZE,
             word_timestamps=settings.WHISPER_WORD_TIMESTAMPS,
             condition_on_previous_text=settings.WHISPER_CONDITION_ON_PREVIOUS_TEXT,
+            temperature=settings.whisper_temperature_tuple,
+            best_of=settings.WHISPER_BEST_OF,
+            no_speech_threshold=settings.WHISPER_NO_SPEECH_THRESHOLD,
+            compression_ratio_threshold=settings.WHISPER_COMPRESSION_RATIO_THRESHOLD,
+            log_prob_threshold=settings.WHISPER_LOG_PROB_THRESHOLD,
+            initial_prompt=settings.WHISPER_INITIAL_PROMPT,
+            vad_parameters={
+                "min_silence_duration_ms": settings.WHISPER_VAD_MIN_SILENCE_MS,
+                "speech_pad_ms": settings.WHISPER_VAD_SPEECH_PAD_MS,
+            },
         )
 
+        logger.info("Transcripción iniciada, procesando segmentos...")
+
+        transcript_parts: list[str] = []
+
         for segment in segments:
-            # Calcular progreso
-            progress = (segment.end / info.duration) * 100
+            segment_text = segment.text.strip()
+            transcript_parts.append(segment_text)
 
-            # Poner el texto y el progreso en la cola
-            _ = asyncio.run_coroutine_threadsafe(
-                queue.put({"text": segment.text, "progress": round(progress, 2)}), loop
-            )
+            # Calcular progreso (máx 99.9% hasta finalizar)
+            progress = min(round((segment.end / info.duration) * 100, 2), 99.9)
 
-        # Avisar que finalizó
-        asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+            msg = {"progress": progress, "new_text": segment_text}
+            _ = asyncio.run_coroutine_threadsafe(queue.put(msg), loop)
+
+        transcript_text = " ".join(transcript_parts)
+
+        logger.info("Transcripción finalizada")
+        _ = asyncio.run_coroutine_threadsafe(
+            queue.put({"text": transcript_text, "done": True}), loop
+        )
 
     except Exception as e:
         logger.error(f"Error en hilo de transcripción: {e}")
-        asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+        _ = asyncio.run_coroutine_threadsafe(queue.put(None), loop)
         raise e
 
 
@@ -83,42 +107,50 @@ async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
     loop = asyncio.get_running_loop()
 
     try:
-        # Lanzar tarea en hilo separado
-        worker = asyncio.to_thread(
+        # Lanzar tarea en hilo separado como tarea de fondo
+        worker_coro = asyncio.to_thread(
             transcribe_audio_sync,
             typing.cast("WhisperModel", model),
             job.file_path,
             loop,
             queue,
         )
-
-        transcript_parts = []
+        worker = asyncio.create_task(worker_coro)
 
         while True:
-            data = await queue.get()
-            if data is None:
-                break
+            try:
+                # Usar wait_for para evitar bloqueos eternos si el worker muere
+                data = await asyncio.wait_for(queue.get(), timeout=2.0)
 
-            transcript_parts.append(data["text"])
+                if data is None:
+                    break
 
-            # Publicar progreso y texto parcial
-            logger.info(f"Publishing to redis: channel:transcription:{job_id} data: {data}")
-            await redis.publish(
-                f"channel:transcription:{job_id}",
-                json.dumps(
-                    {
-                        "status": StatusTranscription.PROCESSING,
-                        "id": str(job_id),
-                        "progress": data["progress"],
-                        "new_text": data["text"],
-                    }
-                ),
-            )
+                if data.get("done"):
+                    transcription_text = data.get("text")
+                    break
 
-        await worker  # Esperar a que termine realmente la corrutina
+                # Publicar progreso + texto incremental
+                await redis.publish(
+                    f"channel:transcription:{job_id}",
+                    json.dumps(
+                        {
+                            "status": StatusTranscription.PROCESSING.value,
+                            "id": str(job_id),
+                            "progress": data.get("progress"),
+                            "new_text": data.get("new_text"),
+                        }
+                    ),
+                )
+            except TimeoutError:
+                if worker.done():
+                    logger.error(f"El worker terminó inesperadamente para el job {job_id}")
+                    break
 
-        transcription_text = "".join(transcript_parts)
-        final_status = StatusTranscription.DONE
+        await (
+            worker
+        )  # Esperar a que termine realmente la corrutina y propagar excepciones si las hubo
+
+        final_status = StatusTranscription.DONE if transcription_text else StatusTranscription.FAIL
     except Exception as e:
         logger.error(f"No se pudo transcribir el archivo {job_id}: {e}")
 
@@ -136,5 +168,11 @@ async def process_audio_task(ctx: dict[str, Any], job_id: uuid.UUID):
 
         await redis.publish(
             f"channel:transcription:{job_id}",
-            json.dumps({"status": job.status, "id": str(job_id), "transcript": job.transcript}),
+            json.dumps(
+                {
+                    "status": job.status.value,
+                    "id": str(job_id),
+                    "transcript": job.transcript,
+                }
+            ),
         )
