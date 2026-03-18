@@ -32,15 +32,33 @@ class Settings(BaseSettings):
         "default", "auto", "int8", "int8_float16", "int16", "float16", "float32"
     ] = "int8"
 
-    # --- NUEVO: Control de Rendimiento en CPU ---
+    #  Control de Rendimiento en CPU ---
     WHISPER_CPU_THREADS: int = 4
     WHISPER_NUM_WORKERS: int = 1
 
-    # --- NUEVO: Opciones de Transcripción (Optimizadas para velocidad) ---
+    # --- Opciones de Transcripción ---
     WHISPER_VAD_FILTER: bool = True
     WHISPER_BEAM_SIZE: int = 5
     WHISPER_WORD_TIMESTAMPS: bool = False
-    WHISPER_CONDITION_ON_PREVIOUS_TEXT: bool = True
+    WHISPER_CONDITION_ON_PREVIOUS_TEXT: bool = False
+
+    # --- Precisión, Determinismo y Calidad ---
+    WHISPER_TEMPERATURE: str = "0.0,0.2,0.4,0.6,0.8,1.0"
+    WHISPER_BEST_OF: int = 1
+    WHISPER_NO_SPEECH_THRESHOLD: float = 0.6
+    WHISPER_COMPRESSION_RATIO_THRESHOLD: float = 2.4
+    WHISPER_LOG_PROB_THRESHOLD: float = -1.0
+    WHISPER_INITIAL_PROMPT: str | None = None
+
+    # --- VAD (Voice Activity Detection) ---
+    WHISPER_VAD_MIN_SILENCE_MS: int = 500
+    WHISPER_VAD_SPEECH_PAD_MS: int = 400
+
+    @computed_field
+    @property
+    def whisper_temperature_tuple(self) -> tuple[float, ...]:
+        """Convierte la cadena de temperaturas en una tupla de floats para faster-whisper."""
+        return tuple(float(t.strip()) for t in self.WHISPER_TEMPERATURE.split(","))
 
     @computed_field
     @property
