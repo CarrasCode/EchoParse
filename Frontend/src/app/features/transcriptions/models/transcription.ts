@@ -6,6 +6,15 @@ export interface TranscriptionJob {
   status: TranscriptionStatus;
   transcript?: string | null;
   created_at?: string;
+  progress?: number;
+}
+
+export interface TranscriptionWsPayload {
+  status: TranscriptionStatus;
+  id?: string;
+  progress?: number;
+  transcript?: string;
+  new_text?: string;
 }
 
 export interface PaginatedTranscriptions {
