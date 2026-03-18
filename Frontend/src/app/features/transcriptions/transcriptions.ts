@@ -1,7 +1,10 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { TranscriptionService } from "./services/transcription";
 import { WebSocketService } from "../../core/services/web-socket";
-import { TranscriptionJob } from "./models/transcription";
+import {
+  TranscriptionJob,
+  TranscriptionWsPayload,
+} from "./models/transcription";
 import { UploadAreaComponent } from "./components/upload-area";
 import { TranscriptionListComponent } from "./components/transcription-list";
 
@@ -135,17 +138,29 @@ export class TranscriptionsComponent implements OnInit {
 
   private listenToWebSockets() {
     this.webSocketService.messages$.subscribe((msg) => {
+      const data = msg.data as TranscriptionWsPayload;
+
       this.jobs.update((currentJobs) => {
         return currentJobs.map((job) => {
-          const data = msg.data as TranscriptionJob;
-          if (job.id === msg.ticketId) {
-            return {
-              ...job,
-              status: data.status,
-              transcript: data.transcript || job.transcript,
-            };
+          if (job.id !== msg.ticketId) return job;
+
+          const updatedJob = { ...job, status: data.status };
+
+          if (data.status === "PROCESSING") {
+            if (data.progress !== undefined) {
+              updatedJob.progress = data.progress;
+            }
+            if (data.new_text) {
+              updatedJob.transcript = job.transcript
+                ? `${job.transcript} ${data.new_text}`
+                : data.new_text;
+            }
+          } else if (data.status === "DONE") {
+            updatedJob.transcript = data.transcript ?? job.transcript;
+            updatedJob.progress = 100;
           }
-          return job;
+
+          return updatedJob;
         });
       });
     });
