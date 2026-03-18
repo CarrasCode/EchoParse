@@ -60,11 +60,18 @@ import { TranscriptionJob } from "../models/transcription";
         </div>
       </div>
 
-      <!-- Indeterminate Progress Bar for Processing -->
+      <!-- Progress Bar for Processing -->
       @if (job().status === "PROCESSING") {
-        <div class="w-full bg-gray-200 rounded-full h-2 mb-2 overflow-hidden">
+        <div
+          class="flex justify-between items-center text-xs text-gray-500 mb-1"
+        >
+          <span>Processing...</span>
+          <span>{{ job().progress || 0 }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
           <div
-            class="bg-blue-600 h-2 rounded-full w-full animate-pulse-fast"
+            class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            [style.width.%]="job().progress || 0"
           ></div>
         </div>
       } @else if (job().status === "DONE") {
@@ -73,7 +80,7 @@ import { TranscriptionJob } from "../models/transcription";
         </div>
       }
 
-      @if (job().status === "DONE") {
+      @if (job().status === "DONE" || job().status === "PROCESSING") {
         <div
           class="mt-2 flex justify-between items-center text-xs font-medium text-blue-600"
         >
@@ -83,15 +90,30 @@ import { TranscriptionJob } from "../models/transcription";
           }
         </div>
 
-        @if (expanded() && job().transcript) {
-          <div
-            class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700 max-h-60 overflow-y-auto"
-            (click)="$event.stopPropagation()"
-            (keydown)="$event.stopPropagation()"
-            role="presentation"
-          >
-            {{ job().transcript }}
-          </div>
+        @if (expanded()) {
+          @if (job().transcript) {
+            <div
+              class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700 max-h-60 overflow-y-auto"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()"
+              role="presentation"
+            >
+              {{ job().transcript }}
+              @if (job().status === "PROCESSING") {
+                <span
+                  class="inline-block w-1.5 h-4 ml-0.5 bg-blue-500 animate-pulse rounded-sm align-text-bottom"
+                ></span>
+              }
+            </div>
+          } @else if (job().status === "PROCESSING") {
+            <div
+              class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-400 animate-pulse"
+              (click)="$event.stopPropagation()"
+              role="presentation"
+            >
+              Waiting for transcription...
+            </div>
+          }
         }
       }
     </div>
