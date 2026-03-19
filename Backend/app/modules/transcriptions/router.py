@@ -99,8 +99,15 @@ async def delete_transcription(id: uuid.UUID, bd: SessionDep):
 
 
 @router.websocket("/ws/{ticket_id}")
-async def connect_channel(ticket_id: uuid.UUID, websocket: WebSocket, arq: ArqDep):
-
+async def connect_channel(ticket_id: uuid.UUID, websocket: WebSocket, arq: ArqDep, db: SessionDep):
+    transcription = await get_transcription_bd(ticket_id, db)
+    if not transcription:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transcription not found")
+    if transcription.status != StatusTranscription.PROCESSING:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="Transcription its over",
+        )
     await websocket.accept()
     async with arq.pubsub() as pubsub:  # pyright: ignore[reportUnknownMemberType]
         await pubsub.subscribe(  # pyright: ignore[reportUnknownMemberType]
@@ -108,23 +115,29 @@ async def connect_channel(ticket_id: uuid.UUID, websocket: WebSocket, arq: ArqDe
         )
         while True:
             try:
-                message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0)
-                if message:
-                    raw_response = message.get("data")
-                    assert isinstance(raw_response, bytes), (
-                        f"Se esperaba bytes, se obtuvo {type(raw_response)}"
-                    )
-
-                    raw_response_str = raw_response.decode("utf-8")
-                    await websocket.send_text(raw_response_str)
-                    transcription_update = TranscriptionUpdate.model_validate_json(raw_response_str)
-                    # si el status es done, se cierra la conexion
-                    if transcription_update.status in [
-                        StatusTranscription.DONE,
-                        StatusTranscription.FAIL,
-                    ]:
+                message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=10.0)
+                # Hipotetico caso de conectar y justo antes de recibir el mensaje, el job termina
+                if not message:
+                    db_status = await get_transcription_bd(ticket_id, db)
+                    if db_status.status is not StatusTranscription.PROCESSING:
                         await websocket.close(code=1000, reason="Connection finished")
                         break
+
+                raw_response = message.get("data")
+                assert isinstance(raw_response, bytes), (
+                    f"Se esperaba bytes, se obtuvo {type(raw_response)}"
+                )
+                raw_response_str = raw_response.decode("utf-8")
+                await websocket.send_text(raw_response_str)
+                transcription_update = TranscriptionUpdate.model_validate_json(raw_response_str)
+                # si el status es done, se cierra la conexion
+                if transcription_update.status in [
+                    StatusTranscription.DONE,
+                    StatusTranscription.FAIL,
+                ]:
+                    await websocket.close(code=1000, reason="Connection finished")
+                    break
+
             except WebSocketDisconnect:
                 break
             except ValidationError:
