@@ -102,6 +102,7 @@ services:
       - ./Backend/:/code/ # General: monta TODO
       - /code/.venv # Específico: "protege" .venv
       - backend_data:/code/data # Específico: "protege" data
+      - huggingface_cache:/root/.cache/huggingface
     networks:
       - echoparse-network
 
@@ -127,6 +128,7 @@ volumes:
   postgres_data:
   redis_data:
   backend_data:
+  huggingface_cache:
 
 networks:
   echoparse-network:
