@@ -103,7 +103,10 @@ async def connect_channel(ticket_id: uuid.UUID, websocket: WebSocket, arq: ArqDe
     transcription = await get_transcription_bd(ticket_id, db)
     if not transcription:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transcription not found")
-    if transcription.status != StatusTranscription.PROCESSING:
+    if transcription.status in (
+        StatusTranscription.DONE,
+        StatusTranscription.FAIL,
+    ):
         raise HTTPException(
             status_code=status.HTTP_410_GONE,
             detail="Transcription its over",
@@ -119,9 +122,13 @@ async def connect_channel(ticket_id: uuid.UUID, websocket: WebSocket, arq: ArqDe
                 # Hipotetico caso de conectar y justo antes de recibir el mensaje, el job termina
                 if not message:
                     db_status = await get_transcription_bd(ticket_id, db)
-                    if db_status.status is not StatusTranscription.PROCESSING:
+                    if db_status.status in (
+                        StatusTranscription.DONE,
+                        StatusTranscription.FAIL,
+                    ):
                         await websocket.close(code=1000, reason="Connection finished")
                         break
+                    continue
 
                 raw_response = message.get("data")
                 assert isinstance(raw_response, bytes), (
